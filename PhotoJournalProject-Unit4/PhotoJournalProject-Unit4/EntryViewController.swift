@@ -8,13 +8,22 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class EntryViewController: UIViewController {
 
+    @IBOutlet weak var EditingTextView: UITextView!
+    
+    @IBOutlet weak var EditingImage: UIImageView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
 
 
+    @IBAction func photoLibraryAccess(_ sender: UIBarButtonItem) {
+        
+        
+        
+    }
 }
 

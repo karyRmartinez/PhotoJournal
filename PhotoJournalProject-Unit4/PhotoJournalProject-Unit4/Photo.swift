@@ -7,3 +7,13 @@
 //
 
 import Foundation
+
+struct Photo: Codable {
+  
+    let imageData: Data 
+  
+
+}
+
+ 
+

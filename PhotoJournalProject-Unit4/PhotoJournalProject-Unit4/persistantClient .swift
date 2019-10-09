@@ -19,8 +19,12 @@ struct ImagePersistence {
         try persistenceHelper.saveSingleObject(newElement: info)
     }
     
+  func getPhotos() throws -> [Photo] {
+      return try persistenceHelper.getObjects()
+  }
     
-    func getProfileImage() throws -> Photo {
-        return try persistenceHelper.getSingleObject() ?? Photo(imageData: Data())
-    }
+    
 }
+
+
+

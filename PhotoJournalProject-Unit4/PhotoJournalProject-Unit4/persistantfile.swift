@@ -8,9 +8,8 @@
 
 import Foundation
 
-
-
 struct PersistenceHelper<T: Codable> {
+    
     func getObjects() throws -> [T] {
         guard let data = FileManager.default.contents(atPath: url.path) else {
             return []
@@ -37,6 +36,11 @@ struct PersistenceHelper<T: Codable> {
         elements.append(newElement)
         let serializedData = try PropertyListEncoder().encode(elements)
         try serializedData.write(to: url, options: Data.WritingOptions.atomic)
+    }
+    
+    func replace(elements: [T]) throws { //Used for deletion
+        let serializedData = try PropertyListEncoder().encode(elements)
+        try serializedData.write(to: url, options: .atomic)
     }
     
     init(fileName: String){

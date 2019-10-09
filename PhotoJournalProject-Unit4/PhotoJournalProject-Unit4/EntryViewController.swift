@@ -9,72 +9,90 @@
 import UIKit
 
 class EntryViewController: UIViewController {
-
-
-    @IBOutlet weak var textView: UITextView!
-   
-    var photoLibraryAccess = false
+    
+    
+    @IBOutlet weak var descriptionTextView: UITextView!
     
     @IBAction func cancelButtonPressed(_ sender: UIButton) {
         dismiss(animated: true, completion: nil)
     }
     @IBOutlet weak var EditingImage: UIImageView!
     
+    
+    @IBAction func SaveButton(_ sender: UIButton) {
+        savedPhotos()
+    }
+    var photoLibraryAccess = false
+    
     var image = UIImage() {
         didSet {
             EditingImage.image = image
         }
     }
-    @IBAction func SaveButton(_ sender: UIButton) {
-        savedPhotos()
-        
-    }
     
     
     func savedPhotos(){
-   
         guard let image = EditingImage.image else { return}
         guard let imageData = image.jpegData(compressionQuality: 0.5) else { return }
-       
-
-            DispatchQueue.main.async {
-                self.dismiss(animated: true, completion: nil)
-            }
+        guard let descriptionText = descriptionTextView.text else { return }
+        
+        let newPhoto = Photo(imageData: imageData, description: descriptionText, id: Photo.getIDForNewPhoto())
+        
+        do {
+            try? PhotosPersistenceHelper.manager.savePhoto(photo: newPhoto)
         }
-
-    
-    
-    override func viewWillAppear(_ animated: Bool) {
+        
+        DispatchQueue.main.async {
+            self.dismiss(animated: true, completion: nil)
+        }
+        
         
     }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        textView.delegate = self
         
-       
+        descriptionTextView.text = "Enter Text here"
+        descriptionTextView.textColor = UIColor.black
+        descriptionTextView.delegate = self
     }
-
-
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == "Enter Text here" {
+            textView.text = ""
+            textView.textColor = UIColor.black
+        }
+    }
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            textView.resignFirstResponder()
+        }
+        return true
+    }
+    
+    
     @IBAction func photoLibraryAccess(_ sender: UIBarButtonItem) {
         
         let imagePickerViewController = UIImagePickerController()
-              imagePickerViewController.delegate = self
-              imagePickerViewController.sourceType = .photoLibrary
-              
-              if photoLibraryAccess{
-                  imagePickerViewController.delegate = self
-                  present(imagePickerViewController, animated: true, completion: nil)
-              } else {
-                  let alertVC = UIAlertController(title: "No Access", message: "Camera access is required to use this app.", preferredStyle: .alert)
-                  alertVC.addAction(UIAlertAction (title: "Deny", style: .destructive, handler: nil))
-                  self.present(alertVC, animated: true, completion: nil)
-                  
-                  alertVC.addAction(UIAlertAction (title: "Allowed", style: .default, handler: { (action) in
-                      self.photoLibraryAccess = true
-                      self.present(imagePickerViewController, animated: true, completion: nil)
-                  }))
-              }
-          }
+        imagePickerViewController.delegate = self
+        imagePickerViewController.sourceType = .photoLibrary
+        
+        if photoLibraryAccess{
+            imagePickerViewController.delegate = self
+            present(imagePickerViewController, animated: true, completion: nil)
+        } else {
+            let alertVC = UIAlertController(title: "No Access", message: "Photo access is required to use this app.", preferredStyle: .alert)
+            alertVC.addAction(UIAlertAction (title: "Deny", style: .destructive, handler: nil))
+            self.present(alertVC, animated: true, completion: nil)
+            
+            alertVC.addAction(UIAlertAction (title: "Allowed", style: .default, handler: { (action) in
+                self.photoLibraryAccess = true
+                self.present(imagePickerViewController, animated: true, completion: nil)
+            }))
+        }
+    }
     
 }
 
@@ -83,6 +101,7 @@ extension EntryViewController: UIImagePickerControllerDelegate, UINavigationCont
         dismiss(animated: true, completion: nil)
     }
     
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = info[.originalImage] as? UIImage {
             EditingImage.image = image
@@ -90,11 +109,6 @@ extension EntryViewController: UIImagePickerControllerDelegate, UINavigationCont
             print("original image is nil")
         }
         dismiss(animated: true) {
-            //save to File Manager
-            guard let imageData = self.EditingImage.image?.jpegData(compressionQuality: 0.5) else {return}
-            
-            let ImageInfo = Photo(imageData: imageData)
-             try? ImagePersistence.manager.saveProfileImage(info: ImageInfo)
         }
     }
     
@@ -103,5 +117,6 @@ extension EntryViewController: UIImagePickerControllerDelegate, UINavigationCont
 
 
 extension EntryViewController: UITextViewDelegate {
-  
+    
+    
 }
